@@ -109,6 +109,33 @@ CREATE TABLE review (
 );
 
 
+-- INDEXES FOR PERFORMANCE OPTIMIZATION
+
+-- PROPERTY
+CREATE INDEX idx_property_city ON property(city);
+CREATE INDEX idx_property_host ON property(host_id);
+
+-- PROPERTY_AVAILABILITY
+CREATE INDEX idx_availability_property ON property_availability(property_id);
+CREATE INDEX idx_availability_dates ON property_availability(start_date, end_date);
+
+-- BOOKING
+CREATE INDEX idx_booking_user ON booking(user_id);
+CREATE INDEX idx_booking_availability ON booking(availability_id);
+CREATE INDEX idx_booking_dates ON booking(check_in, check_out);
+
+-- PAYMENT
+CREATE INDEX idx_payment_booking ON payment(booking_id);
+
+-- REVIEW
+CREATE INDEX idx_review_booking ON review(booking_id);
+CREATE INDEX idx_review_user ON review(user_id);
+
+-- USER_ROLE
+CREATE INDEX idx_user_role_user ON user_role(user_id);
+CREATE INDEX idx_user_role_role ON user_role(role_id);
+
+
 -- ROLES
 INSERT INTO role VALUES
 (1,'ADMIN'),
@@ -206,4 +233,5 @@ INSERT INTO review (booking_id,user_id,rating,comment) VALUES
 (8,8,3,'Average'),
 (9,9,5,'Perfect'),
 (10,10,2,'Not great');
+
 
