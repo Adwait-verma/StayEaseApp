@@ -73,6 +73,21 @@ jobs:
       MYSQL_PWD: root-test-password
     steps:
       - uses: actions/checkout@v5
+      - name: Wait for a stable MySQL connection
+        run: |
+          stable_checks=0
+          for attempt in {1..30}; do
+            if mysql --host=127.0.0.1 --user=root --execute 'SELECT 1' >/dev/null 2>&1; then
+              stable_checks=$((stable_checks + 1))
+              if [ "$stable_checks" -eq 3 ]; then
+                break
+              fi
+            else
+              stable_checks=0
+            fi
+            sleep 2
+          done
+          test "$stable_checks" -eq 3
       - name: Apply schema, integrity rules, and demo data
         run: |
           mysql --host=127.0.0.1 --user=root stayease < database/migrations/001_schema.sql
