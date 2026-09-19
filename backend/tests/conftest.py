@@ -18,6 +18,7 @@ def app():
             "SQLALCHEMY_DATABASE_URI": "sqlite://",
             "SQLALCHEMY_ENGINE_OPTIONS": {},
             "JWT_SECRET": "test-secret-that-is-long-enough-for-the-suite",
+            "RATELIMIT_ENABLED": False,
         }
     )
 

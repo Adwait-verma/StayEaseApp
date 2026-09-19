@@ -93,6 +93,7 @@ jobs:
           mysql --host=127.0.0.1 --user=root stayease < database/migrations/001_schema.sql
           mysql --host=127.0.0.1 --user=root stayease < database/migrations/002_integrity.sql
           mysql --host=127.0.0.1 --user=root stayease < database/migrations/003_seed.sql
+          mysql --host=127.0.0.1 --user=root stayease < database/migrations/004_reliability.sql
       - name: Verify seeded booking workflow
         run: |
           test "$(mysql --host=127.0.0.1 --user=root --skip-column-names --batch stayease -e 'SELECT COUNT(*) FROM properties;')" = "4"

@@ -255,6 +255,9 @@ class Payment(db.Model):
         nullable=False,
         unique=True,
     )
+    idempotency_key: Mapped[str] = mapped_column(
+        db.String(100), nullable=False, unique=True
+    )
     amount: Mapped[Decimal] = mapped_column(db.Numeric(12, 2), nullable=False)
     currency: Mapped[str] = mapped_column(db.String(3), default="INR", nullable=False)
     status: Mapped[str] = mapped_column(

@@ -70,11 +70,19 @@ export const api = {
       body: JSON.stringify(payload),
     }),
   bookings: () => request<{ items: Booking[] }>("/bookings"),
-  pay: (bookingId: number) =>
-    request<{ booking: Booking }>(`/bookings/${bookingId}/pay`, {
+  pay: (bookingId: number) => {
+    const storageKey = `stayease_payment_key_${bookingId}`;
+    const idempotencyKey = sessionStorage.getItem(storageKey) || crypto.randomUUID();
+    sessionStorage.setItem(storageKey, idempotencyKey);
+    return request<{ booking: Booking }>(`/bookings/${bookingId}/pay`, {
       method: "POST",
+      headers: { "Idempotency-Key": idempotencyKey },
       body: "{}",
-    }),
+    }).then((result) => {
+      sessionStorage.removeItem(storageKey);
+      return result;
+    });
+  },
   cancel: (bookingId: number, reason: string) =>
     request<{ booking: Booking }>(`/bookings/${bookingId}/cancel`, {
       method: "POST",

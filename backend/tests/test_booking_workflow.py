@@ -122,7 +122,10 @@ def test_payment_and_cancellation_refund_the_demo_payment(client, register):
 
     paid = client.post(
         f"/api/bookings/{booking_id}/pay",
-        headers=auth_header(guest["token"]),
+        headers={
+            **auth_header(guest["token"]),
+            "Idempotency-Key": "payment-cancellation-test-key",
+        },
     )
     cancelled = client.post(
         f"/api/bookings/{booking_id}/cancel",
@@ -152,7 +155,13 @@ def test_completed_stay_can_be_reviewed_and_is_visible_to_admin(
         headers=guest_headers,
         json={"rating": 5, "comment": "Too early"},
     )
-    client.post(f"/api/bookings/{booking_id}/pay", headers=guest_headers)
+    client.post(
+        f"/api/bookings/{booking_id}/pay",
+        headers={
+            **guest_headers,
+            "Idempotency-Key": "payment-review-test-key",
+        },
+    )
     completed = client.post(
         f"/api/bookings/{booking_id}/complete",
         headers=auth_header(admin_token),

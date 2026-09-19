@@ -2,7 +2,7 @@ from flask import Blueprint, jsonify
 from sqlalchemy import func, select
 
 from ..errors import ApiError
-from ..extensions import db
+from ..extensions import db, limiter
 from ..models import Role, User
 from ..security import (
     create_access_token,
@@ -17,6 +17,7 @@ auth_bp = Blueprint("auth", __name__, url_prefix="/api/auth")
 
 
 @auth_bp.post("/register")
+@limiter.limit("5 per minute")
 def register():
     body = json_body()
     full_name = required_text(body, "fullName", max_length=100)
@@ -59,6 +60,7 @@ def register():
 
 
 @auth_bp.post("/login")
+@limiter.limit("10 per minute")
 def login():
     body = json_body()
     email = required_text(body, "email", max_length=150).lower()

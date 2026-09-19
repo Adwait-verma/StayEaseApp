@@ -2,7 +2,7 @@ from datetime import datetime, timezone
 from decimal import Decimal
 from uuid import uuid4
 
-from flask import Blueprint, g, jsonify
+from flask import Blueprint, g, jsonify, request
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
@@ -134,9 +134,30 @@ def list_bookings():
 @bookings_bp.post("/<int:booking_id>/pay")
 @require_roles("GUEST")
 def pay_for_booking(booking_id: int):
-    booking = _load_booking(booking_id)
+    idempotency_key = request.headers.get("Idempotency-Key", "").strip()
+    if not 16 <= len(idempotency_key) <= 100:
+        raise ApiError("A valid Idempotency-Key header is required")
+
+    booking = db.session.scalar(
+        _booking_query()
+        .where(Booking.booking_id == booking_id)
+        .with_for_update()
+    )
+    if booking is None:
+        raise ApiError("Booking not found", 404)
     if booking.guest_id != g.current_user.user_id:
         raise AuthorizationError("You can only pay for your own booking")
+
+    existing = db.session.scalar(
+        select(Payment).where(Payment.idempotency_key == idempotency_key)
+    )
+    if existing is not None:
+        if existing.booking_id != booking.booking_id:
+            raise ApiError("That idempotency key belongs to another payment", 409)
+        response = jsonify({"booking": serialize_booking(booking)})
+        response.headers["Idempotent-Replayed"] = "true"
+        return response
+
     if booking.status != "PENDING":
         raise ApiError("Only pending bookings can be paid", 409)
     if booking.payment is not None:
@@ -144,6 +165,7 @@ def pay_for_booking(booking_id: int):
 
     payment = Payment(
         booking_id=booking.booking_id,
+        idempotency_key=idempotency_key,
         amount=booking.total_amount,
         status="PENDING",
         provider_reference=f"DEMO-{uuid4().hex[:16].upper()}",
@@ -154,7 +176,9 @@ def pay_for_booking(booking_id: int):
     payment.paid_at = datetime.now(timezone.utc)
     booking.status = "CONFIRMED"
     db.session.commit()
-    return jsonify({"booking": serialize_booking(_load_booking(booking.booking_id))})
+    response = jsonify({"booking": serialize_booking(_load_booking(booking.booking_id))})
+    response.headers["Idempotent-Replayed"] = "false"
+    return response
 
 
 @bookings_bp.post("/<int:booking_id>/cancel")
