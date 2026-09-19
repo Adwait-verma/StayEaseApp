@@ -1,47 +1,51 @@
 # Development roadmap
 
-## Milestone 1 - Repository foundation
+## Completed portfolio MVP
 
-- Professional project narrative and architecture
-- Environment template and ignore rules
-- Reproducible MySQL container
+- [x] Professional project narrative and architecture
+- [x] Reproducible MySQL environment and versioned migrations
+- [x] Normalized users, roles, properties, availability, bookings, payments, and reviews
+- [x] Indexed search, row locking, overlap checks, and lifecycle constraints
+- [x] JWT authentication and role/ownership authorization
+- [x] Property, availability, booking, payment, cancellation, review, and admin APIs
+- [x] Responsive marketplace, booking flow, and role-specific dashboards
+- [x] API integration tests with an enforced coverage threshold
+- [x] Continuous checks for Python, React, and MySQL migrations
+- [x] Seeded demo accounts and recruiter walkthrough
 
-## Milestone 2 - Data integrity
+## Recommended next additions
 
-- Versioned schema and seed data
-- Normalized users, roles, properties, availability, bookings, payments, and reviews
-- Indexed search and overlap checks
-- Safe rating aggregation and booking lifecycle constraints
+These are deliberately optional. Each should be added only when it demonstrates a new engineering skill rather than increasing feature count.
 
-## Milestone 3 - Backend MVP
+### Strong next step: observability
 
-- Registration and login
-- Role-based property management
-- Availability search
-- Transactional booking service
-- Payment, cancellation, completion, and review workflows
-- Administrator metrics
+- Structured request logging with correlation IDs
+- Error tracking and latency measurements
+- A small operations panel for failed or abandoned bookings
 
-## Milestone 4 - Frontend MVP
+### Strong next step: asynchronous work
 
-- Responsive marketplace and property details
-- Authentication flows
-- Guest booking history
-- Host listing and reservation management
-- Administrator overview
+- Queue booking-confirmation and cancellation emails
+- Use a local development mail viewer instead of a paid email provider
+- Add retry and idempotency rules for notification jobs
 
-## Milestone 5 - Evidence and quality
+### Product extensions
 
-- Unit and integration tests
-- Continuous integration
-- OpenAPI or endpoint documentation
-- Screenshots, seeded demo accounts, and recruiter-focused walkthrough
+- Favorites using the existing `favorites` table
+- Property image upload with local object-storage emulation
+- Map-based discovery with an open map provider
+- Seasonal pricing and minimum-stay rules
+- Payment-provider sandbox mode behind the current payment interface
 
-## Optional extensions
+### Deployment, only if useful
 
-- Object storage for property images
-- Email notifications
-- Map-based search
-- Wishlists
-- Dynamic pricing rules
-- Payment-provider test mode
+- Record a local walkthrough first; it is free and sufficient for applications
+- Consider a temporary free-tier deployment only for interviews or demonstrations
+- Never commit production credentials or replace the simulated payment flow with real card handling for this student project
+
+## Known portfolio boundaries
+
+- Payments are simulated and intentionally accept no financial information.
+- The MySQL locking strategy is validated by schema checks and service tests; a dedicated concurrent load test remains future work.
+- Property images are repository assets rather than user uploads.
+- Public cloud availability and production monitoring are outside the current local-first scope.
