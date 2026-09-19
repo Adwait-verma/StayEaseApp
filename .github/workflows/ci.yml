@@ -1,0 +1,85 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backend:
+    name: API quality and tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: pip
+          cache-dependency-path: backend/requirements*.txt
+      - name: Install dependencies
+        run: pip install -r requirements-dev.txt
+      - name: Lint
+        run: ruff check app tests
+      - name: Test with coverage
+        run: pytest
+
+  frontend:
+    name: Web quality and build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - name: Install dependencies
+        run: npm ci
+      - name: Lint
+        run: npm run lint
+      - name: Build production bundle
+        run: npm run build
+
+  database:
+    name: MySQL migration smoke test
+    runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8.4
+        env:
+          MYSQL_DATABASE: stayease
+          MYSQL_ROOT_PASSWORD: root-test-password
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h localhost -proot-test-password"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=20
+    env:
+      MYSQL_PWD: root-test-password
+    steps:
+      - uses: actions/checkout@v4
+      - name: Apply schema, integrity rules, and demo data
+        run: |
+          mysql --host=127.0.0.1 --user=root stayease < database/migrations/001_schema.sql
+          mysql --host=127.0.0.1 --user=root stayease < database/migrations/002_integrity.sql
+          mysql --host=127.0.0.1 --user=root stayease < database/migrations/003_seed.sql
+      - name: Verify seeded booking workflow
+        run: |
+          test "$(mysql --host=127.0.0.1 --user=root --skip-column-names --batch stayease -e 'SELECT COUNT(*) FROM properties;')" = "4"
+          test "$(mysql --host=127.0.0.1 --user=root --skip-column-names --batch stayease -e 'SELECT status FROM bookings WHERE booking_id = 1;')" = "COMPLETED"
+          test "$(mysql --host=127.0.0.1 --user=root --skip-column-names --batch stayease -e 'SELECT COUNT(*) FROM reviews;')" = "1"
