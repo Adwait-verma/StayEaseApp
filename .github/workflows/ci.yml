@@ -71,8 +71,15 @@ jobs:
           --health-retries=20
     env:
       MYSQL_PWD: root-test-password
+      MYSQL_HOST: 127.0.0.1
+      MYSQL_USER: root
+      MYSQL_PASSWORD: root-test-password
+      MYSQL_DATABASE: stayease
     steps:
       - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
       - name: Wait for a stable MySQL connection
         run: |
           stable_checks=0
@@ -99,3 +106,9 @@ jobs:
           test "$(mysql --host=127.0.0.1 --user=root --skip-column-names --batch stayease -e 'SELECT COUNT(*) FROM properties;')" = "4"
           test "$(mysql --host=127.0.0.1 --user=root --skip-column-names --batch stayease -e 'SELECT status FROM bookings WHERE booking_id = 1;')" = "COMPLETED"
           test "$(mysql --host=127.0.0.1 --user=root --skip-column-names --batch stayease -e 'SELECT COUNT(*) FROM reviews;')" = "1"
+      - name: Install concurrency-test dependency
+        run: python -m pip install "PyMySQL>=1.1,<2"
+      - name: Race 25 bookings for the same dates
+        run: |
+          python database/tests/concurrency_test.py --contenders 25 --json-output concurrency-result.json | tee concurrency-summary.md
+          cat concurrency-summary.md >> "$GITHUB_STEP_SUMMARY"

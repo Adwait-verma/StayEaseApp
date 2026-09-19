@@ -14,6 +14,7 @@ The application supports guest, host, and administrator journeys through a respo
 - Property publishing, availability windows, capacity, and date-aware pricing
 - Search by city, dates, party size, and price
 - Conflict-safe booking with row locking and indexed overlap detection
+- A repeatable 25-request MySQL race proving that only one overlapping booking wins
 - Server-calculated totals and a simulated payment/refund lifecycle
 - Reviews restricted to completed stays
 - Guest, host, and administrator dashboards
@@ -102,7 +103,7 @@ docs/                    Architecture, roadmap, and recruiter walkthrough
 Task *.pdf / Task *.sql  Preserved coursework baseline
 ```
 
-Read [the architecture decisions](docs/ARCHITECTURE.md), [the API reference](backend/README.md), or follow [the five-minute demo](docs/DEMO.md).
+Read [the architecture decisions](docs/ARCHITECTURE.md), [the concurrency proof](docs/CONCURRENCY.md), [the API reference](backend/README.md), or follow [the five-minute demo](docs/DEMO.md).
 
 ## Project status and cost
 
