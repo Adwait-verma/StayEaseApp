@@ -14,4 +14,9 @@ class Config:
     }
     JWT_SECRET = os.getenv("JWT_SECRET", "development-only-secret-change-me")
     JWT_EXPIRES_MINUTES = int(os.getenv("JWT_EXPIRES_MINUTES", "120"))
+    CORS_ORIGINS: ClassVar[list[str]] = [
+        origin.strip()
+        for origin in os.getenv("CORS_ORIGINS", "http://localhost:5173").split(",")
+        if origin.strip()
+    ]
     JSON_SORT_KEYS = False

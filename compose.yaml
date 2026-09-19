@@ -28,6 +28,7 @@ services:
       DATABASE_URL: ${DATABASE_URL:-mysql+pymysql://stayease:stayease-local-password@db:3306/stayease}
       JWT_SECRET: ${JWT_SECRET:-development-only-secret-change-me}
       JWT_EXPIRES_MINUTES: ${JWT_EXPIRES_MINUTES:-120}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:5173,http://localhost:3000}
     ports:
       - "5000:5000"
     depends_on:

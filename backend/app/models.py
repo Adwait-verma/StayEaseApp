@@ -1,12 +1,17 @@
 from __future__ import annotations
 
-from datetime import date, datetime
+from datetime import UTC, date, datetime
 from decimal import Decimal
 
 from sqlalchemy import CheckConstraint, ForeignKey, Index, Table, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from .extensions import db
+
+
+def utc_now() -> datetime:
+    """Return naive UTC for database columns that do not store a timezone."""
+    return datetime.now(UTC).replace(tzinfo=None)
 
 user_roles = Table(
     "user_roles",
@@ -17,7 +22,7 @@ user_roles = Table(
     db.Column(
         "role_id", ForeignKey("roles.role_id", ondelete="RESTRICT"), primary_key=True
     ),
-    db.Column("assigned_at", db.DateTime, default=datetime.utcnow, nullable=False),
+    db.Column("assigned_at", db.DateTime, default=utc_now, nullable=False),
 )
 
 
@@ -43,7 +48,7 @@ class Role(db.Model):
     role_id: Mapped[int] = mapped_column(primary_key=True)
     role_name: Mapped[str] = mapped_column(db.String(30), unique=True, nullable=False)
     created_at: Mapped[datetime] = mapped_column(
-        default=datetime.utcnow, nullable=False
+        default=utc_now, nullable=False
     )
 
 
@@ -59,11 +64,11 @@ class User(db.Model):
     phone: Mapped[str | None] = mapped_column(db.String(20), unique=True)
     is_active: Mapped[bool] = mapped_column(default=True, nullable=False)
     created_at: Mapped[datetime] = mapped_column(
-        default=datetime.utcnow, nullable=False
+        default=utc_now, nullable=False
     )
     updated_at: Mapped[datetime] = mapped_column(
-        default=datetime.utcnow,
-        onupdate=datetime.utcnow,
+        default=utc_now,
+        onupdate=utc_now,
         nullable=False,
     )
 
@@ -108,11 +113,11 @@ class Property(db.Model):
     review_count: Mapped[int] = mapped_column(default=0, nullable=False)
     is_active: Mapped[bool] = mapped_column(default=True, nullable=False)
     created_at: Mapped[datetime] = mapped_column(
-        default=datetime.utcnow, nullable=False
+        default=utc_now, nullable=False
     )
     updated_at: Mapped[datetime] = mapped_column(
-        default=datetime.utcnow,
-        onupdate=datetime.utcnow,
+        default=utc_now,
+        onupdate=utc_now,
         nullable=False,
     )
 
@@ -183,7 +188,7 @@ class AvailabilityWindow(db.Model):
     is_active: Mapped[bool] = mapped_column(default=True, nullable=False)
     note: Mapped[str | None] = mapped_column(db.String(255))
     created_at: Mapped[datetime] = mapped_column(
-        default=datetime.utcnow, nullable=False
+        default=utc_now, nullable=False
     )
 
     property: Mapped[Property] = relationship(back_populates="availability_windows")
@@ -219,11 +224,11 @@ class Booking(db.Model):
     )
     cancellation_reason: Mapped[str | None] = mapped_column(db.String(500))
     created_at: Mapped[datetime] = mapped_column(
-        default=datetime.utcnow, nullable=False
+        default=utc_now, nullable=False
     )
     updated_at: Mapped[datetime] = mapped_column(
-        default=datetime.utcnow,
-        onupdate=datetime.utcnow,
+        default=utc_now,
+        onupdate=utc_now,
         nullable=False,
     )
 
@@ -258,11 +263,11 @@ class Payment(db.Model):
     provider_reference: Mapped[str | None] = mapped_column(db.String(100), unique=True)
     paid_at: Mapped[datetime | None]
     created_at: Mapped[datetime] = mapped_column(
-        default=datetime.utcnow, nullable=False
+        default=utc_now, nullable=False
     )
     updated_at: Mapped[datetime] = mapped_column(
-        default=datetime.utcnow,
-        onupdate=datetime.utcnow,
+        default=utc_now,
+        onupdate=utc_now,
         nullable=False,
     )
 
@@ -287,11 +292,11 @@ class Review(db.Model):
     rating: Mapped[int] = mapped_column(nullable=False)
     comment: Mapped[str | None] = mapped_column(db.Text)
     created_at: Mapped[datetime] = mapped_column(
-        default=datetime.utcnow, nullable=False
+        default=utc_now, nullable=False
     )
     updated_at: Mapped[datetime] = mapped_column(
-        default=datetime.utcnow,
-        onupdate=datetime.utcnow,
+        default=utc_now,
+        onupdate=utc_now,
         nullable=False,
     )
 
@@ -308,7 +313,7 @@ class Favorite(db.Model):
         ForeignKey("properties.property_id", ondelete="CASCADE"), primary_key=True
     )
     created_at: Mapped[datetime] = mapped_column(
-        default=datetime.utcnow, nullable=False
+        default=utc_now, nullable=False
     )
 
 
@@ -322,5 +327,5 @@ class BookingStatusHistory(db.Model):
     old_status: Mapped[str | None] = mapped_column(db.String(20))
     new_status: Mapped[str] = mapped_column(db.String(20), nullable=False)
     changed_at: Mapped[datetime] = mapped_column(
-        default=datetime.utcnow, nullable=False
+        default=utc_now, nullable=False
     )
