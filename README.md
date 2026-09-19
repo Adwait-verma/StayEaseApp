@@ -20,6 +20,7 @@ The application supports guest, host, and administrator journeys through a respo
 - Guest, host, and administrator dashboards
 - Versioned schema, constraints, triggers, stored procedures, and repeatable seed data
 - Automated API coverage plus frontend and MySQL checks on every push
+- An interactive OpenAPI explorer at `/api-docs`
 
 ## Engineering highlights
 
@@ -59,7 +60,7 @@ cp .env.example .env
 docker compose up --build
 ```
 
-Open `http://localhost:3000`. The API is available at `http://localhost:5000/api`, and MySQL is initialized automatically from `database/migrations/` the first time the database volume is created.
+Open `http://localhost:3000`. The API is available at `http://localhost:5000/api`, interactive documentation is at `http://localhost:3000/api-docs`, and MySQL is initialized automatically from `database/migrations/` the first time the database volume is created.
 
 On Windows PowerShell, use `Copy-Item .env.example .env` instead of `cp`.
 

@@ -1,4 +1,5 @@
 import { Github, HeartHandshake } from "lucide-react";
+import { lazy, Suspense } from "react";
 import { Link, Route, Routes } from "react-router-dom";
 
 import { Header } from "./components/Header";
@@ -10,6 +11,7 @@ import { HomePage } from "./pages/HomePage";
 import { HostPage } from "./pages/HostPage";
 import { PropertyPage } from "./pages/PropertyPage";
 
+const ApiDocsPage = lazy(() => import("./pages/ApiDocsPage"));
 
 function Footer() {
   return (
@@ -32,6 +34,7 @@ function Footer() {
           <a href="https://github.com/Adwait-verma/StayEaseApp">
             <Github size={16} /> GitHub repository
           </a>
+          <Link to="/api-docs">Interactive API docs</Link>
           <span>
             <HeartHandshake size={16} /> Built as a student project
           </span>
@@ -50,6 +53,14 @@ export default function App() {
         <Route path="/properties/:id" element={<PropertyPage />} />
         <Route path="/login" element={<AuthPage mode="login" />} />
         <Route path="/register" element={<AuthPage mode="register" />} />
+        <Route
+          path="/api-docs"
+          element={
+            <Suspense fallback={<main className="page-loading">Loading API explorer…</main>}>
+              <ApiDocsPage />
+            </Suspense>
+          }
+        />
         <Route
           path="/dashboard"
           element={

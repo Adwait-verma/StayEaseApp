@@ -2,6 +2,8 @@
 
 The Flask API owns authentication, authorization, pricing, booking, payment, cancellation, and review rules. The client never sends trusted totals or arbitrary user IDs.
 
+The versioned OpenAPI contract is available from `/api/openapi.yaml`. When the full application is running, Swagger UI is available at `http://localhost:3000/api-docs` for schema inspection and local request execution.
+
 ## Run locally without Docker
 
 Create the MySQL database using the files in `../database/migrations`, copy the root `.env.example` to `.env`, and then run:

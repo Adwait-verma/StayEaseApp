@@ -1,0 +1,547 @@
+openapi: 3.1.0
+info:
+  title: StayEase API
+  version: 1.0.0
+  summary: Conflict-safe accommodation booking API
+  description: |
+    StayEase exposes guest, host, and administrator workflows. Authenticated
+    identity comes from a bearer token; prices and totals are calculated by
+    the service. Payment is a local simulation and accepts no financial data.
+servers:
+  - url: /
+    description: Current StayEase environment
+tags:
+  - name: Operations
+  - name: Authentication
+  - name: Properties
+  - name: Bookings
+  - name: Administration
+paths:
+  /api/live:
+    get:
+      tags: [Operations]
+      summary: Process liveness
+      operationId: getLiveness
+      responses:
+        "200":
+          description: API process is running
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, const: ok }
+                  service: { type: string, example: stayease-api }
+  /api/ready:
+    get:
+      tags: [Operations]
+      summary: Database readiness
+      operationId: getReadiness
+      responses:
+        "200": { $ref: "#/components/responses/Ready" }
+        "503": { $ref: "#/components/responses/Unavailable" }
+  /api/health:
+    get:
+      tags: [Operations]
+      summary: Backward-compatible readiness alias
+      operationId: getHealth
+      responses:
+        "200": { $ref: "#/components/responses/Ready" }
+        "503": { $ref: "#/components/responses/Unavailable" }
+  /api/openapi.yaml:
+    get:
+      tags: [Operations]
+      summary: Download this OpenAPI contract
+      operationId: getOpenApiContract
+      responses:
+        "200":
+          description: OpenAPI YAML document
+          content:
+            application/yaml:
+              schema: { type: string }
+  /api/auth/register:
+    post:
+      tags: [Authentication]
+      summary: Register a guest or host
+      operationId: register
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/RegisterRequest" }
+      responses:
+        "201": { $ref: "#/components/responses/AuthSuccess" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "409": { $ref: "#/components/responses/Conflict" }
+        "429": { $ref: "#/components/responses/RateLimited" }
+  /api/auth/login:
+    post:
+      tags: [Authentication]
+      summary: Exchange credentials for a JWT
+      operationId: login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/LoginRequest" }
+      responses:
+        "200": { $ref: "#/components/responses/AuthSuccess" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "429": { $ref: "#/components/responses/RateLimited" }
+  /api/auth/me:
+    get:
+      tags: [Authentication]
+      summary: Get the current account
+      operationId: getCurrentUser
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200":
+          description: Current account
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [user]
+                properties:
+                  user: { $ref: "#/components/schemas/User" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+  /api/properties:
+    get:
+      tags: [Properties]
+      summary: Search active properties
+      operationId: searchProperties
+      parameters:
+        - { name: city, in: query, schema: { type: string } }
+        - { name: guests, in: query, schema: { type: integer, minimum: 1, maximum: 50 } }
+        - { name: checkIn, in: query, schema: { type: string, format: date } }
+        - { name: checkOut, in: query, schema: { type: string, format: date } }
+        - { name: minPrice, in: query, schema: { type: number, minimum: 0 } }
+        - { name: maxPrice, in: query, schema: { type: number, minimum: 0 } }
+        - { name: page, in: query, schema: { type: integer, minimum: 1, default: 1 } }
+        - { name: perPage, in: query, schema: { type: integer, minimum: 1, maximum: 50, default: 12 } }
+      responses:
+        "200":
+          description: Paginated catalog
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/PropertyPage" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+    post:
+      tags: [Properties]
+      summary: Publish a host property
+      operationId: createProperty
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/PropertyWrite" }
+      responses:
+        "201": { $ref: "#/components/responses/PropertySuccess" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+  /api/properties/{property_id}:
+    parameters:
+      - $ref: "#/components/parameters/PropertyId"
+    get:
+      tags: [Properties]
+      summary: Get one property and its availability
+      operationId: getProperty
+      responses:
+        "200": { $ref: "#/components/responses/PropertySuccess" }
+        "404": { $ref: "#/components/responses/NotFound" }
+    patch:
+      tags: [Properties]
+      summary: Update a property owned by the current host
+      operationId: updateProperty
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title: { type: string, maxLength: 150 }
+                description: { type: string, maxLength: 4000 }
+                basePrice: { type: number, exclusiveMinimum: 0 }
+                capacity: { type: integer, minimum: 1, maximum: 50 }
+                active: { type: boolean }
+      responses:
+        "200": { $ref: "#/components/responses/PropertySuccess" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/NotFound" }
+  /api/properties/{property_id}/availability:
+    parameters:
+      - $ref: "#/components/parameters/PropertyId"
+    post:
+      tags: [Properties]
+      summary: Add an availability and price window
+      operationId: addAvailability
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/AvailabilityWrite" }
+      responses:
+        "201":
+          description: Availability created
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/NotFound" }
+  /api/bookings:
+    get:
+      tags: [Bookings]
+      summary: List bookings visible to the current account
+      operationId: listBookings
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200":
+          description: Role-filtered bookings
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items: { $ref: "#/components/schemas/Booking" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+    post:
+      tags: [Bookings]
+      summary: Create a conflict-safe guest booking
+      description: The service locks the property, validates availability and overlaps, then calculates the total.
+      operationId: createBooking
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/BookingWrite" }
+      responses:
+        "201": { $ref: "#/components/responses/BookingSuccess" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "409": { $ref: "#/components/responses/Conflict" }
+  /api/bookings/{booking_id}/pay:
+    parameters:
+      - $ref: "#/components/parameters/BookingId"
+      - $ref: "#/components/parameters/IdempotencyKey"
+    post:
+      tags: [Bookings]
+      summary: Confirm a simulated payment
+      description: Replaying the same idempotency key returns the original payment without duplicating it.
+      operationId: payForBooking
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200": { $ref: "#/components/responses/BookingSuccess" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "409": { $ref: "#/components/responses/Conflict" }
+  /api/bookings/{booking_id}/cancel:
+    parameters:
+      - $ref: "#/components/parameters/BookingId"
+    post:
+      tags: [Bookings]
+      summary: Cancel a booking and simulate a refund
+      operationId: cancelBooking
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [reason]
+              properties:
+                reason: { type: string, maxLength: 500 }
+      responses:
+        "200": { $ref: "#/components/responses/BookingSuccess" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "409": { $ref: "#/components/responses/Conflict" }
+  /api/bookings/{booking_id}/complete:
+    parameters:
+      - $ref: "#/components/parameters/BookingId"
+    post:
+      tags: [Bookings]
+      summary: Complete a confirmed stay
+      operationId: completeBooking
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200": { $ref: "#/components/responses/BookingSuccess" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "409": { $ref: "#/components/responses/Conflict" }
+  /api/bookings/{booking_id}/review:
+    parameters:
+      - $ref: "#/components/parameters/BookingId"
+    post:
+      tags: [Bookings]
+      summary: Review a completed stay
+      operationId: createReview
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ReviewWrite" }
+      responses:
+        "201":
+          description: Review created
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "409": { $ref: "#/components/responses/Conflict" }
+  /api/admin/stats:
+    get:
+      tags: [Administration]
+      summary: Get marketplace operational metrics
+      operationId: getAdminStats
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200":
+          description: Marketplace totals
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AdminStats" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  parameters:
+    PropertyId:
+      name: property_id
+      in: path
+      required: true
+      schema: { type: integer, minimum: 1 }
+    BookingId:
+      name: booking_id
+      in: path
+      required: true
+      schema: { type: integer, minimum: 1 }
+    IdempotencyKey:
+      name: Idempotency-Key
+      in: header
+      required: true
+      schema: { type: string, minLength: 16, maxLength: 100 }
+      example: 90f128ee-3669-41fb-a458-1ea91b59e67c
+  schemas:
+    RegisterRequest:
+      type: object
+      required: [fullName, email, password, role]
+      properties:
+        fullName: { type: string, maxLength: 100, example: Maya Kapoor }
+        email: { type: string, format: email, example: maya@example.com }
+        password: { type: string, format: password, minLength: 8, example: StrongPass123! }
+        phone: { type: string, maxLength: 20 }
+        role: { type: string, enum: [GUEST, HOST] }
+    LoginRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email: { type: string, format: email, example: guest@stayease.local }
+        password: { type: string, format: password, example: Guest123! }
+    User:
+      type: object
+      required: [id, fullName, email, roles, active]
+      properties:
+        id: { type: integer }
+        fullName: { type: string }
+        email: { type: string, format: email }
+        phone: { type: [string, "null"] }
+        roles:
+          type: array
+          items: { type: string, enum: [GUEST, HOST, ADMIN] }
+        active: { type: boolean }
+    PropertyWrite:
+      type: object
+      required: [title, description, addressLine, city, capacity, basePrice]
+      properties:
+        title: { type: string, maxLength: 150, example: Riverstone Cottage }
+        description: { type: string, maxLength: 4000 }
+        addressLine: { type: string, maxLength: 255 }
+        city: { type: string, maxLength: 100, example: Rishikesh }
+        country: { type: string, maxLength: 100, default: India }
+        capacity: { type: integer, minimum: 1, maximum: 50 }
+        bedrooms: { type: integer, minimum: 1, maximum: 30 }
+        bathrooms: { type: number, exclusiveMinimum: 0 }
+        basePrice: { type: number, exclusiveMinimum: 0 }
+    Property:
+      type: object
+      required: [id, hostId, title, city, country, capacity, basePrice, active]
+      properties:
+        id: { type: integer }
+        hostId: { type: integer }
+        hostName: { type: string }
+        title: { type: string }
+        slug: { type: string }
+        description: { type: string }
+        city: { type: string }
+        country: { type: string }
+        capacity: { type: integer }
+        bedrooms: { type: integer }
+        bathrooms: { type: number }
+        basePrice: { type: number }
+        averageRating: { type: number }
+        reviewCount: { type: integer }
+        active: { type: boolean }
+        coverImage: { type: [string, "null"] }
+        amenities:
+          type: array
+          items: { type: string }
+    PropertyPage:
+      type: object
+      required: [items, page, perPage, total, pages]
+      properties:
+        items:
+          type: array
+          items: { $ref: "#/components/schemas/Property" }
+        page: { type: integer }
+        perPage: { type: integer }
+        total: { type: integer }
+        pages: { type: integer }
+    AvailabilityWrite:
+      type: object
+      required: [startDate, endDate, pricePerNight]
+      properties:
+        startDate: { type: string, format: date }
+        endDate: { type: string, format: date }
+        pricePerNight: { type: number, exclusiveMinimum: 0 }
+        note: { type: string, maxLength: 255 }
+    BookingWrite:
+      type: object
+      required: [propertyId, checkIn, checkOut, guestCount]
+      properties:
+        propertyId: { type: integer, minimum: 1 }
+        checkIn: { type: string, format: date }
+        checkOut: { type: string, format: date }
+        guestCount: { type: integer, minimum: 1, maximum: 50 }
+    Booking:
+      type: object
+      required: [id, guestId, property, checkIn, checkOut, totalAmount, status]
+      properties:
+        id: { type: integer }
+        guestId: { type: integer }
+        property:
+          type: object
+          properties:
+            id: { type: integer }
+            title: { type: string }
+            city: { type: string }
+            coverImage: { type: [string, "null"] }
+        checkIn: { type: string, format: date }
+        checkOut: { type: string, format: date }
+        guestCount: { type: integer }
+        nightlyRate: { type: number }
+        totalNights: { type: integer }
+        totalAmount: { type: number }
+        status: { type: string, enum: [PENDING, CONFIRMED, CANCELLED, COMPLETED] }
+        cancellationReason: { type: [string, "null"] }
+        payment: { type: [object, "null"] }
+        review: { type: [object, "null"] }
+        createdAt: { type: string, format: date-time }
+    ReviewWrite:
+      type: object
+      required: [rating]
+      properties:
+        rating: { type: integer, minimum: 1, maximum: 5 }
+        comment: { type: string, maxLength: 2000 }
+    AdminStats:
+      type: object
+      properties:
+        users: { type: integer }
+        activeProperties: { type: integer }
+        bookings: { type: integer }
+        paidRevenue: { type: number }
+        bookingsByStatus:
+          type: object
+          additionalProperties: { type: integer }
+    AuthResponse:
+      type: object
+      required: [token, user]
+      properties:
+        token: { type: string }
+        user: { $ref: "#/components/schemas/User" }
+    Error:
+      type: object
+      required: [error, details, requestId]
+      properties:
+        error: { type: string }
+        details: { type: object, additionalProperties: true }
+        requestId: { type: [string, "null"] }
+  responses:
+    AuthSuccess:
+      description: Authenticated account
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/AuthResponse" }
+    PropertySuccess:
+      description: Property response
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              property: { $ref: "#/components/schemas/Property" }
+    BookingSuccess:
+      description: Booking response
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              booking: { $ref: "#/components/schemas/Booking" }
+    Ready:
+      description: API and database are ready
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              status: { type: string, const: ready }
+              database: { type: string, const: up }
+    Unavailable:
+      description: Database is unavailable
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              status: { type: string, const: not_ready }
+              database: { type: string, const: down }
+    BadRequest:
+      description: Validation failed
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+    Unauthorized:
+      description: Missing, invalid, or expired authentication
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+    Forbidden:
+      description: Role or ownership check failed
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+    NotFound:
+      description: Resource does not exist
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+    Conflict:
+      description: State or uniqueness conflict
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+    RateLimited:
+      description: Too many requests
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }

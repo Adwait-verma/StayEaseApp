@@ -15,6 +15,64 @@
   --shadow: 0 22px 60px rgba(32, 56, 51, 0.12);
 }
 
+.api-docs-page {
+  min-height: 70vh;
+  padding: 72px 0;
+  background: #f7f5ef;
+}
+
+.page-loading {
+  min-height: 60vh;
+  display: grid;
+  place-items: center;
+  color: var(--muted);
+  font-weight: 700;
+}
+
+.api-docs-heading {
+  max-width: 1180px;
+  margin-bottom: 30px;
+}
+
+.api-docs-heading h1 {
+  margin: 8px 0 14px;
+  font-size: clamp(2.4rem, 6vw, 4.5rem);
+  letter-spacing: -0.055em;
+}
+
+.api-docs-heading > p:last-child {
+  max-width: 720px;
+  color: var(--muted);
+  font-size: 1.05rem;
+  line-height: 1.7;
+}
+
+.api-docs-shell {
+  width: min(1180px, calc(100% - 32px));
+  margin: 0 auto;
+  padding: 24px;
+  overflow: hidden;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 24px;
+  box-shadow: var(--shadow);
+}
+
+.api-docs-shell .swagger-ui,
+.api-docs-shell .swagger-ui .info .title,
+.api-docs-shell .swagger-ui .opblock-tag {
+  font-family: inherit;
+}
+
+.api-docs-shell .swagger-ui .topbar {
+  display: none;
+}
+
+.api-docs-shell .swagger-ui .scheme-container {
+  box-shadow: none;
+  border-radius: 14px;
+}
+
 * {
   box-sizing: border-box;
 }
