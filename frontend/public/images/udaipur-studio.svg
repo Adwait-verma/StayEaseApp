@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" role="img" aria-labelledby="title desc">
+  <title id="title">Lakeside Studio Retreat</title>
+  <desc id="desc">An illustrated studio window looking over an Udaipur lake.</desc>
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#d3d9ce"/><stop offset="1" stop-color="#f1d8b5"/></linearGradient>
+    <linearGradient id="lake" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#78aaa8"/><stop offset="1" stop-color="#416f70"/></linearGradient>
+  </defs>
+  <rect width="1200" height="800" fill="#d7c3a3"/>
+  <rect x="120" y="80" width="960" height="610" rx="12" fill="url(#sky)" stroke="#725847" stroke-width="24"/>
+  <circle cx="870" cy="215" r="75" fill="#fff0b5"/>
+  <path d="M132 420c160-90 280-65 420-15 190 67 340-40 516-25v298H132Z" fill="url(#lake)"/>
+  <path d="M140 365 280 230l150 150 140-95 150 110 120-90 220 100v90H140Z" fill="#8f9e8c"/>
+  <g fill="#f0e7d4">
+    <path d="M260 390h95v110h-95zM390 410h125v90H390zM760 390h90v110h-90zM880 405h120v95H880z"/>
+  </g>
+  <path d="M585 92h30v590h-30zM132 365h936v25H132Z" fill="#725847"/>
+  <path d="M0 690h1200v110H0Z" fill="#846650"/>
+  <path d="M310 620h580l80 180H230Z" fill="#b79165"/>
+  <path d="M360 565h480v115H360z" fill="#efe1c8"/>
+</svg>

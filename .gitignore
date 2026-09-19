@@ -18,6 +18,7 @@ node_modules/
 dist/
 .vite/
 coverage/
+*.tsbuildinfo
 
 # IDE and operating system
 .idea/

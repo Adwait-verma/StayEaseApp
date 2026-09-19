@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" role="img" aria-labelledby="title desc">
+  <title id="title">Pink City Heritage Loft</title>
+  <desc id="desc">An illustrated Jaipur interior with arches and warm pink walls.</desc>
+  <defs>
+    <linearGradient id="wall" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#d88976"/><stop offset="1" stop-color="#efb49a"/></linearGradient>
+  </defs>
+  <rect width="1200" height="800" fill="url(#wall)"/>
+  <rect x="70" y="80" width="1060" height="650" rx="18" fill="#e7a28d" stroke="#a95245" stroke-width="14"/>
+  <path d="M180 660V340c0-135 80-210 180-210s180 75 180 210v320Z" fill="#f9e4cd"/>
+  <path d="M660 660V340c0-135 80-210 180-210s180 75 180 210v320Z" fill="#f9e4cd"/>
+  <path d="M235 660V355c0-88 54-145 125-145s125 57 125 145v305Z" fill="#386c69"/>
+  <path d="M715 660V355c0-88 54-145 125-145s125 57 125 145v305Z" fill="#d4c88e"/>
+  <path d="M0 680h1200v120H0Z" fill="#b85f50"/>
+  <path d="M290 520h620v150H290z" fill="#7d4939"/>
+  <path d="M330 460h540l40 80H290Z" fill="#f2c99e"/>
+  <circle cx="600" cy="220" r="74" fill="#f6d49f" stroke="#a95245" stroke-width="15"/>
+  <g fill="#a95245">
+    <rect x="100" y="110" width="30" height="560"/>
+    <rect x="1070" y="110" width="30" height="560"/>
+    <circle cx="185" cy="120" r="28"/>
+    <circle cx="1015" cy="120" r="28"/>
+  </g>
+</svg>

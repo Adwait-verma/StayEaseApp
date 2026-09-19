@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" role="img" aria-labelledby="title desc">
+  <title id="title">Pine Ridge Cabin</title>
+  <desc id="desc">An illustrated timber cabin surrounded by mountain peaks and pine trees.</desc>
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#b9d4d5"/><stop offset="1" stop-color="#ecf0e9"/></linearGradient>
+  </defs>
+  <rect width="1200" height="800" fill="url(#sky)"/>
+  <path d="M0 470 230 180l170 205 170-260 250 310 150-190 230 230v325H0Z" fill="#eef1ea"/>
+  <path d="M0 530 230 270l170 170 170-220 250 270 150-155 230 195v270H0Z" fill="#8aa29c"/>
+  <path d="M0 610c220-80 390-46 590-10 230 41 410-40 610-20v220H0Z" fill="#486b5f"/>
+  <path d="M340 470h500v250H340z" fill="#9d684a"/>
+  <path d="m300 490 290-190 295 190Z" fill="#563c32"/>
+  <path d="M550 560h120v160H550z" fill="#2e4540"/>
+  <path d="M390 550h105v90H390zm330 0h80v90h-80z" fill="#f2c779" stroke="#3d4d47" stroke-width="12"/>
+  <g fill="#294b41">
+    <path d="m140 250-110 310h220Zm70 70-95 290h200Zm790-90-120 350h240Zm105 90-90 290h180Z"/>
+  </g>
+  <path d="M0 720c260-30 430 32 620 5 230-33 400-15 580 20v55H0Z" fill="#6e8a79"/>
+</svg>

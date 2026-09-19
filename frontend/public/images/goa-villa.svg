@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" role="img" aria-labelledby="title desc">
+  <title id="title">Sunset Courtyard Villa</title>
+  <desc id="desc">A warm illustrated villa with a pool and palm trees.</desc>
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#f7cba8"/>
+      <stop offset="1" stop-color="#f4eee2"/>
+    </linearGradient>
+    <linearGradient id="pool" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#7bc4bf"/>
+      <stop offset="1" stop-color="#3b8f91"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="800" fill="url(#sky)"/>
+  <circle cx="950" cy="150" r="80" fill="#fff3cc" opacity=".86"/>
+  <path d="M0 510C230 460 420 500 600 470s390-30 600 35v295H0Z" fill="#98ad85"/>
+  <path d="M245 330h690v290H245z" fill="#fff7ea"/>
+  <path d="M210 340 590 160l390 180Z" fill="#d56a48"/>
+  <path d="M500 430h180v190H500z" fill="#2f625d"/>
+  <path d="M300 420h135v110H300zm450 0h135v110H750z" fill="#8fc0bd" stroke="#315d59" stroke-width="15"/>
+  <path d="M80 800 250 600h700l170 200Z" fill="url(#pool)"/>
+  <path d="M115 760h970" stroke="#d5f1ec" stroke-width="12" opacity=".8"/>
+  <g fill="#315d59">
+    <path d="M130 570c-8-180 20-290 42-320h18c-8 110-10 220 18 320Z"/>
+    <path d="M178 280c-85-35-98-80-100-108 54 5 95 29 112 75 1-61 32-102 73-120 3 53-20 103-68 139 60-14 106 1 140 40-64 21-112 10-157-26Z"/>
+    <path d="M1010 570c-6-145 15-238 34-270h17c-7 92-7 179 15 270Z"/>
+    <path d="M1050 322c-70-28-82-67-83-90 44 4 78 24 92 61 1-50 26-83 60-98 2 43-17 84-56 113 49-12 87 1 115 32-52 17-92 8-128-18Z"/>
+  </g>
+</svg>
